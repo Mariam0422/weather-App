@@ -206,8 +206,8 @@ body {
   }
   
   .icon {
-    width: 68px;
-    height: 68px;
+    width: 80px;
+    height: 80px;
   }
   
   .property {
@@ -241,7 +241,7 @@ body {
     position: relative;
     z-index: 1;
     padding: 18px;
-    margin-top: 32px;
+    /* margin-top: 32px; */
     display: flex;
     flex-wrap: wrap;
     row-gap: 20px;
