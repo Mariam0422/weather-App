@@ -1,13 +1,17 @@
 const link =
   "http://api.weatherapi.com/v1/current.json?key=a42d113e753f4c66a30204211240806";
- 
- const root = document.getElementById("root");
+
+const root = document.getElementById("root");
+const popup = document.getElementById("popup");
+const textInput = document.getElementById("text-input");
+const form = document.getElementById("form");
+const close = document.getElementById("close");
 
 let store = {
-  city: "Yerevan",
-  feelslike_c: 0,  
-  temp_c: 0, 
-  last_updated: "00: 00", 
+  city: "London",
+  feelslike_c: 0,
+  temp_c: 0,
+  last_updated: "00: 00",
   is_day: 0,
   condition: "",
   properties: {
@@ -17,10 +21,12 @@ let store = {
     pressure_in: {},
     uv: {},
     vis_km: {},
-  }
- };
+  },
+};
 const fetchData = async () => {
-  const result = await fetch(`${link}&query=${store.city}`);
+  try{
+  const query = localStorage.getItem("query") || store.city
+  const result = await fetch(`${link}&query=${query}`);
   const data = await result.json();
   console.log(data);
   const {
@@ -35,57 +41,66 @@ const fetchData = async () => {
       vis_km: visKm,
       is_day: isDay,
       wind_degree: windDegree,
-      condition: {text: conditionText, icon: icon}
-       },
+      condition: { text: conditionText, icon: icon },
+    },
+    location: {
+        name
+    }
   } = data;
 
-   store = {
+  store = {
     ...store,
-    feelslike,   
+    feelslike,
+    city: name,
     temp,
-    lastUpdated,  
-    isDay,    
-    conditionText, 
+    lastUpdated,
+    isDay,
+    conditionText,
     icon,
     properties: {
-        cloud : {
+      cloud: {
         title: "cloud",
         value: `${cloud}`,
         icon: "cloud.png",
-        },
-        humidity: {
+      },
+      humidity: {
         title: "humidity",
         value: `${humidity}%`,
         icon: "humidity.png",
-        },
-        wind_degree: {
+      },
+      wind_degree: {
         title: "Wind Degree",
         value: `${windDegree}km/h`,
         icon: "wind.png",
-        },
-        pressure_in: {
+      },
+      pressure_in: {
         title: "pressure",
         value: `${pressure}%`,
         icon: "gauge.png",
-        },
-        uv: {
+      },
+      uv: {
         title: "UV Index",
         value: `${uv}%`,
         icon: "uv-index.png",
-        },
-        vis_km: {
+      },
+      vis_km: {
         title: "Visibility",
         value: `${visKm}%`,
         icon: "visibility.png",
-        },
-      }
+      },
+    },
   };
   renderComponent();
+  }
+  catch(error){
+   console.log(error)
+  }
 };
 const renderProperty = (properties) => {
-   return Object.values(properties).map((data) => {        
-        const {title, value, icon} = data;
-        return  `<div class="property">
+  return Object.values(properties)
+    .map((data) => {
+      const { title, value, icon } = data;
+      return `<div class="property">
         <div class="property-icon">
           <img src="./img/icons/${icon}" alt="">
         </div>
@@ -94,13 +109,14 @@ const renderProperty = (properties) => {
           <div class="property-info__description">${title}</div>
         </div>
       </div>`;
-    }).join("");
-  
-}
+    })
+    .join("");
+};
 const markup = () => {
-    const {city, lastUpdated,temp, conditionText, icon, isDay,properties} = store;
-    const containerClass = isDay === 1 ? "is-day" : "";
-    return `<div class="container ${containerClass}"> 
+  const { city, lastUpdated, temp, conditionText, icon, isDay, properties } =
+    store;
+  const containerClass = isDay === 1 ? "is-day" : "";
+  return `<div class="container ${containerClass}"> 
     <div class="top">
       <div class="city">
         <div class="city-subtitle">Weather Today in</div>
@@ -122,8 +138,35 @@ const markup = () => {
   </div>
 <div id="properties">${renderProperty(properties)}</div>
 </div>`;
-}
+};
+const toggleClass = () => {
+  popup.classList.toggle("active");
+};
 const renderComponent = () => {
-    root.innerHTML = markup();
+  root.innerHTML = markup();
+  const city = document.getElementById("city");
+  city.addEventListener("click", toggleClass);
+};
+
+const handleInput = (e) => {
+  store = {
+    ...store,
+    city: e.target.value,
+  };
+};
+const handleSubmit = (e) => {
+  e.preventDefault();
+  let value = store.city
+  if(!value) return null;
+  localStorage.setItem("query", value)
+  fetchData();
+  toggleClass();
+};
+const closeWindow = () => {
+    toggleClass();
 }
+form.addEventListener("submit", handleSubmit);
+textInput.addEventListener("input", handleInput);
+close.addEventListener("click", closeWindow)
+
 fetchData();

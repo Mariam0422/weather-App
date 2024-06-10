@@ -176,9 +176,11 @@ body {
     cursor: pointer;
     width: max-content;
   }
-  
+  .city-title:hover{
+    box-shadow: 2px 3px 3px grey;
+  }
   .city-info {
-    margin-top: 28px;
+    margin-top: 18px;
   }
   
   .city-info__subtitle {
